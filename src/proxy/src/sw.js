@@ -425,6 +425,14 @@ async function onFetch(e) {
     return fetch(mConf.assets_cdn + filePath)
   }
 
+  // 非google请求不需要处理
+  let googleRegex = new RegExp("^https://\\w+\.google\\w*\.com")
+  if (req.url.match(googleRegex)) {
+
+  } else {
+    return fetch(req.url)
+  }
+
   if (req.mode === 'navigate') {
     const newUrl = urlx.adjustNav(urlStr)
     if (newUrl) {
