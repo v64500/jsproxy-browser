@@ -332,15 +332,6 @@ export async function launch(req, urlObj, cliUrlObj) {
     return {res}
   }
 
-  let googleRegex = new RegExp("^https://\\w+\.google\\w*\.com")
-  if (urlObj.href.match(googleRegex)) {
-    console.log("match gg url:%s", req.url)
-  } else {
-    console.log("not match gg url:%s", req.url)
-    const res = await fetch(req)
-    return {res}
-  }
-
   const url = urlObj.href
   const urlHash = util.strHash(url)
   let host = ''
@@ -428,6 +419,15 @@ export async function launch(req, urlObj, cliUrlObj) {
       console.info("rawUrl:%s", rawUrl)
       console.info("host:%s", host)
       console.info("proxyUrl:%s", proxyUrl)
+
+      let googleRegex = new RegExp("^https://\\w+\.google\\w*\.com")
+      if (rawUrl.match(googleRegex)) {
+        console.log("match gg url:%s", rawUrl)
+      } else {
+        console.log("not match gg url:%s", rawUrl)
+        //const res = await fetch(req)
+        //return {res}
+      }
 
       res = await fetch(proxyUrl, reqOpt)
     } catch (err) {

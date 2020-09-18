@@ -58,7 +58,7 @@ function pageWait(pageId) {
   const timer = setTimeout(_ => {
     pageWaitMap.delete(pageId)
     s.notify(false)
-  }, 2000)
+  }, 5000)
 
   pageWaitMap.set(pageId, [s, timer])
   return s.wait()
@@ -236,6 +236,9 @@ function parseGatewayError(jsonStr, status, urlObj) {
  * @returns {Promise<Response>}
  */
 async function forward(req, urlObj, cliUrlObj, redirNum) {
+
+  console.info("cliUrlObj href:%s", cliUrlObj.href)
+
   const r = await network.launch(req, urlObj, cliUrlObj)
   if (!r) {
     console.warn("load fail url:%s", req.url)
@@ -358,6 +361,8 @@ async function proxy(e, urlObj) {
   }
   const cliUrlObj = new URL(cliUrlStr)
 
+  console.info("cliUrlStr:%s", cliUrlStr)
+
   try {
     return await forward(e.request, urlObj, cliUrlObj, 0)
   } catch (err) {
@@ -426,14 +431,6 @@ async function onFetch(e) {
     return fetch(mConf.assets_cdn + filePath)
   }
 
-  // 非google请求不需要处理
-  let googleRegex = new RegExp("^https://\\w+\.google\\w*\.com")
-  if (req.url.match(googleRegex)) {
-    console.log("match url:%s", req.url)
-  } else {
-    console.log("not match url:%s", req.url)
-  }
-
   if (req.mode === 'navigate') {
     const newUrl = urlx.adjustNav(urlStr)
     if (newUrl) {
@@ -452,19 +449,32 @@ async function onFetch(e) {
     } = handler
 
     if (redir) {
+      console.log("redir url:%s", redir)
       return Response.redirect('/-----' + redir)
     }
     if (content) {
       return makeHtmlRes(content)
     }
     if (replace) {
+      console.log("replace:%s", replace)
       targetUrlStr = replace
     }
+  }
+
+  // 非google请求不需要处理
+  let googleRegex = new RegExp("^https://\\w+\.[google|gstatic]\\w*\.[com|cn]")
+  if (targetUrlStr.match(googleRegex)) {
+    console.log("match url:%s", req.url)
+  } else {
+    console.log("not match url:%s", req.url)
+    console.log("targetUrlStr:%s", targetUrlStr)
+    return Response.redirect(targetUrlStr)
   }
 
   const targetUrlObj = urlx.newUrl(targetUrlStr)
 
   if (targetUrlObj) {
+    console.log("proxy targetUrlStr:%s", targetUrlStr)
     return proxy(e, targetUrlObj)
   }
   return makeHtmlRes('invalid url: ' + targetUrlStr, 500)
