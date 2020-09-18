@@ -332,6 +332,15 @@ export async function launch(req, urlObj, cliUrlObj) {
     return {res}
   }
 
+  let googleRegex = new RegExp("^https://\\w+\.google\\w*\.com")
+  if (urlObj.href.match(googleRegex)) {
+    console.log("match gg url:%s", req.url)
+  } else {
+    console.log("not match gg url:%s", req.url)
+    const res = await fetch(req)
+    return {res}
+  }
+
   const url = urlObj.href
   const urlHash = util.strHash(url)
   let host = ''
@@ -413,6 +422,13 @@ export async function launch(req, urlObj, cliUrlObj) {
     try {
       reqMap['--level'] = level
       updateReqHeaders(reqOpt, reqMap)
+
+      console.info("fetch url:%s", req.url)
+      console.info("fetch urlObj.href:%s", urlObj.href)
+      console.info("rawUrl:%s", rawUrl)
+      console.info("host:%s", host)
+      console.info("proxyUrl:%s", proxyUrl)
+
       res = await fetch(proxyUrl, reqOpt)
     } catch (err) {
       console.warn('fetch fail:', proxyUrl)

@@ -238,6 +238,7 @@ function parseGatewayError(jsonStr, status, urlObj) {
 async function forward(req, urlObj, cliUrlObj, redirNum) {
   const r = await network.launch(req, urlObj, cliUrlObj)
   if (!r) {
+    console.warn("load fail url:%s", req.url)
     return makeHtmlRes('load fail')
   }
   let {
@@ -428,9 +429,9 @@ async function onFetch(e) {
   // 非google请求不需要处理
   let googleRegex = new RegExp("^https://\\w+\.google\\w*\.com")
   if (req.url.match(googleRegex)) {
-
+    console.log("match url:%s", req.url)
   } else {
-    return fetch(req.url)
+    console.log("not match url:%s", req.url)
   }
 
   if (req.mode === 'navigate') {
